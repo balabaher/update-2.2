@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Details</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background: linear-gradient(to right, #a4d3ff, #dcdada);
+      }
+      .back-btn {
+        margin-top: 20px;
+        margin-left: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <!-- Back Button -->
+      <a href="admin_dashboard.html" class="btn btn-primary back-btn">← Back</a>
+
+      <h3>User Details</h3>
+
+      <div class="card">
+        <div class="card-header"><strong>Personal Information</strong></div>
+        <div class="card-body">
+          <p><strong>Full Name:</strong> <span id="full-name"></span></p>
+          <p><strong>Role:</strong> <span id="role"></span></p>
+          <p><strong>Date of Birth:</strong> <span id="dob"></span></p>
+          <p><strong>Age:</strong> <span id="age"></span></p>
+          <p><strong>Gender:</strong> <span id="gender"></span></p>
+          <p><strong>Phone:</strong> <span id="phone"></span></p>
+          <p><strong>Email:</strong> <span id="email"></span></p>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+      const supabaseUrl = "https://sfqhzoorpthmnrjecjkj.supabase.co";
+      const supabaseKey =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmcWh6b29ycHRobW5yamVjamtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MjUyMDksImV4cCI6MjA2MDMwMTIwOX0.zS9xjegQ1mYpt6OIZLEvD_cvXFIDmRy20-9wDLC2ASE";
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      const userId = new URLSearchParams(window.location.search).get("userId");
+
+      const { data: user, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      if (error || !user) {
+        alert("User not found.");
+        throw error;
+      }
+
+      function calculateAge(dob) {
+        const birthDate = new Date(dob);
+        const currentDate = new Date();
+        let age = currentDate.getFullYear() - birthDate.getFullYear();
+        const monthDiff = currentDate.getMonth() - birthDate.getMonth();
+        if (
+          monthDiff < 0 ||
+          (monthDiff === 0 && currentDate.getDate() < birthDate.getDate())
+        ) {
+          age--;
+        }
+        return age;
+      }
+
+      document.getElementById("full-name").innerText = user.full_name;
+      document.getElementById("role").innerText = user.role;
+      document.getElementById("dob").innerText = user.date_of_birth;
+      document.getElementById("age").innerText = calculateAge(
+        user.date_of_birth
+      );
+      document.getElementById("gender").innerText = user.gender;
+      document.getElementById("phone").innerText = user.phone_number;
+      document.getElementById("email").innerText = user.email;
+    </script>
+  </body>
+</html>
